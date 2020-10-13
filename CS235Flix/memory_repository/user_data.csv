@@ -1,0 +1,3 @@
+﻿username,password_hash,time_spent_watching_movies
+mistamime,pbkdf2:sha256:150000$i0E7SvrW$3fcec13019d221b565cb40ddd09ec38db8dc73aa5cbda722cc9a1508bc4075cb,70
+man_of_pokemon,pbkdf2:sha256:150000$0V3YMCRC$52dcf6f404ccace075ba9f88b92bbd691a14333346c1e7217ab8553210f6f684,115

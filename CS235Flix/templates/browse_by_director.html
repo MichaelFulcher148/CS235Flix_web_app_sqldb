@@ -1,0 +1,29 @@
+{% extends 'layout.html' %} {% block content %}
+<main id="main">
+    <h2>Browse by Director [{{ first_initial }}]</h2>
+    <div align="center">{{ left_arrow }}{% for letter in initials %}<a href="{{ url_for('browse_bp.browse_by_director') }}?letter={{ letter }}"> {{ letter }}</a> {% endfor %}{{ right_arrow }}</div>
+    <table width="100%">
+        <tr>
+            <th>
+                Directors:
+            </th>
+            <th>{% if director_name %}Movies By {{ director_name }}:{% else %}Select a Director{% endif %}
+            </th>
+        </tr>
+        <tr>
+            <td width=50%>
+                <ul>{% for director_name in director_list %}
+                    <li><a href="{{ url_for('browse_bp.browse_by_director') }}?director={{ director_name }}">{{ director_name }}</a></li>
+                {% endfor %}</ul>
+            </td>
+            <td width=50% valign="top" align="center">
+                {% if movie_list %}
+                <table width="100%">{% for key in movie_list %}
+                        <tr><td align="center"><a href="{{ url_for('browse_bp.view_movie_info') }}?movie_name={{ key }}&date={{ movie_list[key] }}">{{ key }}, {{ movie_list[key] }}</a></td></tr>
+                {% endfor %}</table>
+                {% endif %}
+            </td>
+        </tr>
+    </table>
+</main>
+{% endblock %}

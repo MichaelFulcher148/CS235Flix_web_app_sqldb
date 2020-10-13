@@ -1,0 +1,11 @@
+.coverage
+.idea
+.pytest_cache
+.vscode
+datafilereaders/__pycache__
+domainmodel/__pycache__
+__pycache__
+htmlcov
+venv
+*.db
+*.egg-info

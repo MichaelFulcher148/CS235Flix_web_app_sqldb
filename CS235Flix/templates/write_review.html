@@ -1,0 +1,18 @@
+{% extends 'layout.html' %} {% block content %}
+<main id="main">
+    {% if movie_found == False %}
+    <h2>Movie Not Found</h2>
+    {% else %}
+        <h2>Write a review for: {{ title }}</h2>
+        <h2>Year of Release: {{ release_year }}</h2>
+    <div><form method="POST" action="{{ handler_url }}">
+               {{ form.csrf_token }}
+        <table width=100%><tr><td valign="top"><strong> {{ form.content.label }}:</strong></td><td align="center"> {{ form.content(rows=5, cols=65) }}</td></tr>
+
+        <tr><td><strong>{{ form.rating.label }}:</strong></td><td align="center"> 1 {{ form.rating(min=1, max=10) }} 10</td></tr></table>
+        <div align="center">{{ form.submit }}</div>
+        </form>
+    </div>
+    {% endif %}
+</main>
+{% endblock %}

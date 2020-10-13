@@ -1,0 +1,14 @@
+<nav id="navigation_bar">
+    <a class="nav_item" href="{{ url_for('home_bp.index') }}">Home</a>
+    <a class="nav_item" href="{{ url_for('authentication_bp.register') }}">Register New User</a>
+    <a class="nav_item" href="{{ url_for('authentication_bp.login') }}">Login</a>
+    <a class="nav_item" href="{{ url_for('authentication_bp.logout') }}">Logout</a><br>
+    <a class="nav_item" href="{{ url_for('watchlist_bp.view_watchlist') }}">My Watchlist</a><br>
+    <a class="nav_item" href="{{ url_for('search_bp.search_movies') }}">Search</a><br>
+    Browse Movies By:
+    <a class="nav_item" href="{{ url_for('browse_bp.browse_by_title') }}">Title</a>
+    <!-- release date -->
+    <a class="nav_item" href="{{ url_for('browse_bp.browse_by_actor') }}">Actor</a>
+    <a class="nav_item" href="{{ url_for('browse_bp.browse_by_director') }}">Director</a>
+    <a class="nav_item" href="{{ url_for('browse_bp.browse_by_genre') }}">Genre</a>
+</nav>

@@ -1,0 +1,5 @@
+{% extends 'layout.html' %} {% block content %}
+<main id="main">
+    <p align="center">The option of you have selected requires login. Please either <a href="{{ url_for('authentication_bp.register') }}">Create an Account</a> or <a href="{{ url_for('authentication_bp.login') }}">Login.</a></p>
+</main>
+{% endblock %}

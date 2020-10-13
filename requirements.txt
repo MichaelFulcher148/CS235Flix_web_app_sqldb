@@ -1,0 +1,5 @@
+Flask==1.1.2
+pytest==5.4.3
+python-dotenv==0.13.0
+Werkzeug~=1.0.1
+WTForms~=2.3.3
