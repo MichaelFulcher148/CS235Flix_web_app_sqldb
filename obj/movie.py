@@ -255,6 +255,7 @@ class Review:
         else:
             self._rating = None
         self._timestamp = datetime.today()
+        self._author = None
 
     def __repr__(self):
         return f'<Review {self._movie_ref}, {self._review_text}, {self._rating}, {self._timestamp}>'
@@ -278,3 +279,7 @@ class Review:
     @property
     def timestamp(self):
         return self._timestamp
+
+    @property
+    def author(self):
+        return self._author
