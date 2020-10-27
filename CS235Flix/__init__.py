@@ -13,12 +13,12 @@ def create_app(test_config=None):
     if test_config is not None:
         app.config.from_mapping(test_config)
         data_path = app.config['TEST_DATA_PATH']
-
+    print(app.config)
     if app.config['REPOSITORY'] == 'memory':
         repo.repository_instance = MemoryRepository()
         populate(data_path, repo.repository_instance)
     elif app.config['REPOSITORY'] == 'database':
-        database_engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], connect_args={"check_same_thread": False}, poolclass=NullPool, ech=app.data['SQLALCHEMY_ECHO'])
+        database_engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], connect_args={"check_same_thread": False}, poolclass=NullPool, echo=app.config['SQLALCHEMY_ECHO'])
         if app.config['TESTING'] == 'True' or len(database_engine.table_names()) == 0:
             print("REPOPULATING DATABASE")
             clear_mappers()

@@ -2,6 +2,7 @@ import abc
 
 repository_instance = None
 
+
 class AbstractRepository(abc.ABC):
     @abc.abstractmethod
     def get_genres(self):

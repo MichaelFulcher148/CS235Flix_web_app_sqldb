@@ -51,7 +51,7 @@ def insert_review(db_session, movie_title, movie_release_year, user_id, review_t
     result = db_session.execute(f"SELECT id FROM movies WHERE title = '{movie_title}' AND release_year = {movie_release_year}").fetchone()
     if result:
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        db_session.execute(f"INSERT INTO reviews (movie_id, review_text, rating, timestamp, author) VALUES ({result[0]}, '{review_text}', {review_rating}, '{timestamp}', {user_id})")
+        db_session.execute(f"INSERT INTO reviews (movie_id, review_text, rating, timestamp, user_id) VALUES ({result[0]}, '{review_text}', {review_rating}, '{timestamp}', {user_id})")
     else:
         print("insert review - Movie not found")
 
@@ -133,6 +133,11 @@ def test_load_review(empty_session):
     a_review = Review(a_movie, review_text, rating)
     result = empty_session.execute(f"SELECT id from users WHERE username = 'jim'").fetchone()
     insert_review(empty_session, movie_title, release_year, result[0], review_text, rating)
-    result = empty_session.execute(f"SELECT id from movies WHERE title = 'Passengers'").fetchone()
-    b_review = empty_session.query(Review).filter(Review._movie._title == 'Passengers').one()
-    assert b_review == a_review
+    # result = empty_session.execute(f"SELECT id from movies WHERE title = 'Passengers'").fetchone()
+    b_review = empty_session.query(Review).filter(Review._movie == a_movie).one()
+    # b_review = empty_session.query(Review).filter('_user' == result[0]).all()
+    # b_review = empty_session.query(Review).all()
+    # print(b_review)
+    # b_review = empty_session.query(Review).filter(User == users[0]).all()
+    print(b_review)
+    assert b_review[0] == a_review

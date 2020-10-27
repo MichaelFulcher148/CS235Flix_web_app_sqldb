@@ -51,14 +51,13 @@ reviews = Table('reviews', metadata, Column('id', Integer, primary_key=True, aut
                 Column('review_text', String(1000), nullable=False),
                 Column('rating', Integer, nullable=False),
                 Column('timestamp', DateTime, nullable=False),
-                Column('author', ForeignKey('users.id')))
+                Column('user_id', ForeignKey('users.id')))
 
 def map_model_to_tables():
     mapper(User, users, properties={
         '_username': users.c.username,
         '_password': users.c.password,
-        '_time_spent_watching_movies_minutes': users.c.time_spent_watching_movies,
-        '_reviews': relationship(Review, backref='_review')
+        '_time_spent_watching_movies_minutes': users.c.time_spent_watching_movies
     })
     mapper(Genre, genres, properties={
         '_genre_name': genres.c.name
@@ -74,14 +73,14 @@ def map_model_to_tables():
         '_review_text': reviews.c.review_text,
         '_rating': reviews.c.rating,
         '_timestamp': reviews.c.timestamp,
-        '_author': relationship(User, backref='_users')
+        '_user': relationship(User, backref='_users')
     })
     mapper(Movie, movies, properties={
         '_title': movies.c.title,
         '_release_year': movies.c.release_year,
         '_description': movies.c.description,
         '_runtime_minutes': movies.c.runtime_minutes,
-        '_director': relationship(Director, backref='_director'),
+        '_director': relationship(Director, backref='_directors'),
         '_actors_list': relationship(Actor, secondary=actors_to_movies, backref='_actors'),
         '_genres_list': relationship(Genre, secondary=genres_to_movies, backref='_genres')
     })

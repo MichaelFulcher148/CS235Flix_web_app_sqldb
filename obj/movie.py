@@ -248,25 +248,25 @@ class Movie:
 
 class Review:
     def __init__(self, movie: 'Movie', review: str, rating: int) -> None:
-        self._movie_ref = movie
+        self._movie = movie
         self._review_text = review
         if 0 < rating < 11:
             self._rating = rating
         else:
             self._rating = None
         self._timestamp = datetime.today()
-        self._author = None
+        self._user = None
 
     def __repr__(self):
-        return f'<Review {self._movie_ref}, {self._review_text}, {self._rating}, {self._timestamp}>'
+        return f'<Review {self._movie}, {self._review_text}, {self._rating}, {self._timestamp}>'
 
     def __eq__(self, other):
-        return self._movie_ref == other.movie and self._review_text == other.review_text \
+        return self._movie == other.movie and self._review_text == other.review_text \
                and self._rating == other.rating and self._timestamp == other.timestamp
 
     @property
     def movie(self):
-        return self._movie_ref
+        return self._movie
 
     @property
     def review_text(self):
@@ -281,5 +281,5 @@ class Review:
         return self._timestamp
 
     @property
-    def author(self):
-        return self._author
+    def user(self):
+        return self._user

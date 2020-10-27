@@ -1,10 +1,96 @@
 from os.path import join as path_join
 from sqlalchemy.orm import scoped_session
 from sqlalchemy.engine import Engine
+from sqlalchemy.orm.exc import NoResultFound
 from flask import _app_ctx_stack
 import csv
 from .abtractrepository import AbstractRepository
-from file_reader.file_reader import MovieFileCSVReader, UserFileReader
+from obj.movie import Genre, Movie, Actor, Director
+
+class SqlAlchemyRepository(AbstractRepository):
+    def __init__(self, session_factory) -> None:
+        self.__session_cm = SessionContextManager(session_factory)
+
+    def close_session(self):
+        self.__session_cm.close_current_session()
+
+    def reset_session(self):
+        self.__session_cm.reset_session()
+
+    def get_genres(self) -> list:
+        try:
+            return self.__session_cm.session.query(Genre).all()
+        except NoResultFound:
+            return None
+
+    def get_movies(self) -> list:
+        try:
+            return self.__session_cm.session.query(Movie).all()
+        except NoResultFound:
+            return None
+
+    def get_actors(self) -> list:
+        try:
+            return self.__session_cm.session.query(Actor).all()
+        except NoResultFound:
+            return None
+
+    def get_directors(self) -> list:
+        try:
+            return self.__session_cm.session.query(Director).all()
+        except NoResultFound:
+            return None
+
+    def get_release_years(self) -> list:
+        return self.__release_years
+
+    def add_movie(self, a_movie: 'Movie') -> None:
+        self.__movies.append(a_movie)
+        for genre in a_movie.genres:
+            if genre not in self.__genre_pop:
+                self.__genre_pop[genre] = 1
+            else:
+                self.__genre_pop[genre] += 1
+
+    def get_size_of_genre(self, a_genre: 'Genre') -> int:
+        return self.__session_cm.session.query(Movie).filter(Movie.genres == a_genre).count()
+
+    def add_genre(self, a_genre: 'Genre'):
+        self.__genres.append(a_genre)
+        if a_genre not in self.__genre_pop:
+            self.__genre_pop[a_genre] = 0
+
+    def add_actor(self, a_actor: 'Actor'):
+        self.__actors.append(a_actor)
+
+    def add_director(self, a_director: 'Director'):
+        self.__directors.append(a_director)
+
+    def add_release_year(self, a_year: int):
+        self.__release_years.append(a_year)
+
+    def tidy_up(self) -> None:
+        self.__movies.sort()
+        self.__directors.sort()
+        self.__actors.sort()
+        self.__genres.sort()
+        self.__release_years.sort()
+
+    def add_user(self, a_user: 'User') -> None:
+        self.__users.append(a_user)
+
+    def get_users(self) -> list:
+        return self.__users
+
+    def find_user(self, username: str) -> 'User' or None:
+        for user in self.__users:
+            if user.username == username:
+                return user
+        return None
+
+    def add_review(self, a_review: 'Review') -> None:
+        self.__reviews.append(a_review)
+        print(self.__reviews)
 
 class SessionContextManager:
     def __init__(self, session_factory):
@@ -36,16 +122,6 @@ class SessionContextManager:
     def close_current_session(self):
         if not self.__session is None:
             self.__session.close()
-
-class SqlAlchemyRepository(AbstractRepository):
-    def __init__(self, session_factory):
-        self._session_cm = SessionContextManager(session_factory)
-
-    def close_session(self):
-        self._session_cm.close_current_session()
-
-    def reset_session(self):
-        self._session_cm.reset_session()
 
 def populate(db_engine: Engine, data_path: str):
     conn = db_engine.raw_connection()

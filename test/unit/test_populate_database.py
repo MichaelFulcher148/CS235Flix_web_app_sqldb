@@ -1,10 +1,10 @@
 from sqlalchemy import select, inspect
+from datetime import datetime
 from sqlalchemy.engine import Engine
 
 # from covid.adapters.orm import metadata
 
 def test_database_populate_inspect_table_names(session):
-
     # Get table information
     inspector = inspect(session)
     assert inspector.get_table_names() == ['actor_colleagues', 'actors', 'directors', 'genres', 'movies', 'movies_actors', 'movies_genres', 'reviews', 'users', 'watched_movies', 'watchlist']
@@ -117,3 +117,29 @@ def test_database_populate_get_users(session):
     assert len(result) == 1
     assert result[0][0] == 'pbkdf2:sha256:150000$0V3YMCRC$52dcf6f404ccace075ba9f88b92bbd691a14333346c1e7217ab8553210f6f684'
     assert result[0][1] == 115
+
+def test_database_populate_get_review(session):
+    movie_title = 'Passengers'
+    genre_list = ['Adventure', 'Drama', 'Romance']
+    director = 'Morten Tyldum'
+    description = 'A spacecraft traveling to a distant colony planet and transporting thousands of people has a malfunction in its sleep chambers. As a result, two passengers are awakened 90 years early.'
+    actors = ['Jennifer Lawrence', 'Chris Pratt', 'Michael Sheen', 'Laurence Fishburne']
+    run_time = 116
+    release_year = 2016
+    connection = session.raw_connection()
+    cursor = connection.cursor()
+    cursor.execute(f"SELECT id, title, description, release_year, director_id, runtime_minutes FROM movies WHERE title = '{movie_title}'")
+    result = cursor.fetchall()
+    cursor.execute("SELECT id FROM users WHERE username == 'mistamime'")
+    result_user = cursor.fetchall()
+    review_text = 'was definitely a 5'
+    rating = 5
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    # insert_review(session, movie_id[0][0], result_user[0][0], review_text, rating)
+    cursor.execute(f"INSERT INTO reviews (movie_id, review_text, rating, timestamp, user_id) VALUES ({result[0][0]}, '{review_text}', {rating}, '{timestamp}', {result_user[0][0]})")
+    cursor.execute(f"SELECT id, review_text, rating, timestamp, user_id FROM reviews WHERE user_id =='{result_user[0][0]}'")
+    result = cursor.fetchall()
+    assert result[0][1] == review_text
+    assert result[0][2] == rating
+    assert result[0][3] == timestamp
+    assert result[0][4] == result_user[0][0]

@@ -1,6 +1,4 @@
-import pytest
-from datetime import datetime
-from obj.movie import Movie, Genre, Actor, Director, Review
+from obj.movie import Movie, Genre, Actor, Director
 
 def test_repository_can_get_genres(a_memory_repo):
     a_genre_list = a_memory_repo.get_genres()

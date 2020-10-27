@@ -9,7 +9,8 @@ from CS235Flix.memory_repository.orm import metadata, map_model_to_tables
 from file_reader.file_reader import MovieFileCSVReader
 from CS235Flix import create_app
 
-TEST_DATA_PATH = path_join('test', 'data')
+# TEST_DATA_PATH = path_join('test', 'data')
+TEST_DATA_PATH = "C:\\Users\\Michael\\OneDrive\\Documents\\UoA\\COMPSCI_235\\Assignment_3\\CS235Flix_web_app_sqldb\\test\\data"
 TEST_DATABASE_URI_IN_MEMORY = 'sqlite://'
 
 @pytest.fixture
@@ -66,5 +67,19 @@ def session():
     map_model_to_tables()
     database_repository.populate(engine, TEST_DATA_PATH)
     yield engine
+    metadata.drop_all(engine)
+    clear_mappers()
+
+@pytest.fixture
+def session_factory():
+    clear_mappers()
+    engine = create_engine(TEST_DATABASE_URI_IN_MEMORY)
+    metadata.create_all(engine)
+    for table in reversed(metadata.sorted_tables):
+        engine.execute(table.delete())
+    map_model_to_tables()
+    session_factory = sessionmaker(bind=engine)
+    database_repository.populate(engine, TEST_DATA_PATH)
+    yield session_factory
     metadata.drop_all(engine)
     clear_mappers()
