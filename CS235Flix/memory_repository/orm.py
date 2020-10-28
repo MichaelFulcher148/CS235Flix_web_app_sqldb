@@ -57,7 +57,8 @@ def map_model_to_tables():
     mapper(User, users, properties={
         '_username': users.c.username,
         '_password': users.c.password,
-        '_time_spent_watching_movies_minutes': users.c.time_spent_watching_movies
+        '_time_spent_watching_movies_minutes': users.c.time_spent_watching_movies,
+        '_reviews': relationship(Review, backref='reviews.user_id')
     })
     mapper(Genre, genres, properties={
         '_genre_name': genres.c.name

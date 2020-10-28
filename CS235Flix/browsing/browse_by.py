@@ -37,7 +37,9 @@ def browse_by_genre():
     if genre_pick is None:
         return render_template('browse_by_genre.html', genre_list=genre_list)
     else:
-        if services.get_pop_of_genre(genre_pick, repo.repository_instance) > 20:
+        h = services.get_pop_of_genre(genre_pick, repo.repository_instance)
+        print(h)
+        if h > 20:
             first_letters, movie_list, first_letter = services.setup_browse_by_genre(first_letter, genre_pick, repo.repository_instance)
             left_link, right_link = setup_arrows('browse_bp.browse_by_genre', first_letter, first_letters, "genre=" + genre_pick)
             return render_template('browse_by_genre.html', genre=genre_pick, genre_list=genre_list, left_arrow=left_link,

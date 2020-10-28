@@ -7,5 +7,6 @@ domainmodel/__pycache__
 __pycache__
 htmlcov
 venv
+csflix235.db
 *.db
 *.egg-info

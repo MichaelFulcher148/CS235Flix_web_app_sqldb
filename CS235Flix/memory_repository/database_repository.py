@@ -2,14 +2,19 @@ from os.path import join as path_join
 from sqlalchemy.orm import scoped_session
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy import desc
 from flask import _app_ctx_stack
 import csv
 from .abtractrepository import AbstractRepository
 from obj.movie import Genre, Movie, Actor, Director
+from obj.user import User
 
 class SqlAlchemyRepository(AbstractRepository):
     def __init__(self, session_factory) -> None:
         self.__session_cm = SessionContextManager(session_factory)
+
+    def __del__(self):
+        self.__session_cm.close_current_session()
 
     def close_session(self):
         self.__session_cm.close_current_session()
@@ -19,25 +24,25 @@ class SqlAlchemyRepository(AbstractRepository):
 
     def get_genres(self) -> list:
         try:
-            return self.__session_cm.session.query(Genre).all()
+            return self.__session_cm.session.query(Genre).order_by('name').all()
         except NoResultFound:
             return None
 
     def get_movies(self) -> list:
         try:
-            return self.__session_cm.session.query(Movie).all()
+            return self.__session_cm.session.query(Movie).order_by('title').all()
         except NoResultFound:
             return None
 
     def get_actors(self) -> list:
         try:
-            return self.__session_cm.session.query(Actor).all()
+            return self.__session_cm.session.query(Actor).order_by('full_name').all()
         except NoResultFound:
             return None
 
     def get_directors(self) -> list:
         try:
-            return self.__session_cm.session.query(Director).all()
+            return self.__session_cm.session.query(Director).order_by('full_name').all()
         except NoResultFound:
             return None
 
@@ -53,37 +58,42 @@ class SqlAlchemyRepository(AbstractRepository):
                 self.__genre_pop[genre] += 1
 
     def get_size_of_genre(self, a_genre: 'Genre') -> int:
-        return self.__session_cm.session.query(Movie).filter(Movie.genres == a_genre).count()
+        return self.__session_cm.session.query(Movie).filter(a_genre).count()
 
     def add_genre(self, a_genre: 'Genre'):
-        self.__genres.append(a_genre)
-        if a_genre not in self.__genre_pop:
-            self.__genre_pop[a_genre] = 0
+        # self.__genres.append(a_genre)
+        # if a_genre not in self.__genre_pop:
+        #     self.__genre_pop[a_genre] = 0
+        hh = self.__session_cm.session.query(Genre).filter('name' == a_genre.genre_name).all()
+        print(f"{hh} - no found")
+
+        with self.__session_cm as scm:
+            scm.session.add(a_genre)
+            scm.commit()
 
     def add_actor(self, a_actor: 'Actor'):
-        self.__actors.append(a_actor)
+        with self.__session_cm as scm:
+            scm.session.add(a_actor)
+            scm.commit()
 
     def add_director(self, a_director: 'Director'):
-        self.__directors.append(a_director)
+        with self.__session_cm as scm:
+            scm.session.add(a_director)
+            scm.commit()
 
     def add_release_year(self, a_year: int):
         self.__release_years.append(a_year)
 
-    def tidy_up(self) -> None:
-        self.__movies.sort()
-        self.__directors.sort()
-        self.__actors.sort()
-        self.__genres.sort()
-        self.__release_years.sort()
-
     def add_user(self, a_user: 'User') -> None:
-        self.__users.append(a_user)
+        with self.__session_cm as scm:
+            scm.session.add(a_user)
+            scm.commit()
 
     def get_users(self) -> list:
-        return self.__users
+        return self.__session_cm.session.query(User).all()
 
     def find_user(self, username: str) -> 'User' or None:
-        for user in self.__users:
+        for user in self.__session_cm.session.query(User).all():
             if user.username == username:
                 return user
         return None

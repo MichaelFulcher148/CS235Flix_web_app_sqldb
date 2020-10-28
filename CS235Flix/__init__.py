@@ -1,4 +1,5 @@
 from flask import Flask
+from os.path import join as path_join
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, clear_mappers
 from sqlalchemy.pool import NullPool
@@ -10,10 +11,10 @@ from CS235Flix.memory_repository.orm import metadata, map_model_to_tables
 def create_app(test_config=None):
     app = Flask(__name__)
     app.config.from_object('config.Config')
+    data_path = path_join('CS235Flix', 'memory_repository')
     if test_config is not None:
         app.config.from_mapping(test_config)
         data_path = app.config['TEST_DATA_PATH']
-    print(app.config)
     if app.config['REPOSITORY'] == 'memory':
         repo.repository_instance = MemoryRepository()
         populate(data_path, repo.repository_instance)
