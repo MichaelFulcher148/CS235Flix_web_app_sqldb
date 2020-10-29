@@ -50,23 +50,24 @@ class SqlAlchemyRepository(AbstractRepository):
         return self.__release_years
 
     def add_movie(self, a_movie: 'Movie') -> None:
-        self.__movies.append(a_movie)
-        for genre in a_movie.genres:
-            if genre not in self.__genre_pop:
-                self.__genre_pop[genre] = 1
-            else:
-                self.__genre_pop[genre] += 1
+        pass
+        # self.__movies.append(a_movie)
+        # for genre in a_movie.genres:
+        #     if genre not in self.__genre_pop:
+        #         self.__genre_pop[genre] = 1
+        #     else:
+        #         self.__genre_pop[genre] += 1
 
     def get_size_of_genre(self, a_genre: 'Genre') -> int:
-        return self.__session_cm.session.query(Movie).filter(a_genre).count()
+        return self.__session_cm.session.query(Movie).filter_by(_name=a_genre.genre_name).count()
 
     def add_genre(self, a_genre: 'Genre'):
         # self.__genres.append(a_genre)
         # if a_genre not in self.__genre_pop:
         #     self.__genre_pop[a_genre] = 0
-        hh = self.__session_cm.session.query(Genre).filter('name' == a_genre.genre_name).all()
+        hh = self.__session_cm.session.query(Genre).filter(_genre_name=a_genre.genre_name).all()
         print(f"{hh} - no found")
-
+        #  i want to first check with a filter if a_genre exists in db the nest the add/commit into corrisponding if statement.
         with self.__session_cm as scm:
             scm.session.add(a_genre)
             scm.commit()

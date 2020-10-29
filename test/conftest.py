@@ -1,5 +1,5 @@
 import pytest
-from os.path import join as path_join
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, clear_mappers
 import CS235Flix.memory_repository.abtractrepository as repo
@@ -10,7 +10,7 @@ from file_reader.file_reader import MovieFileCSVReader
 from CS235Flix import create_app
 
 # TEST_DATA_PATH = path_join('test', 'data')
-TEST_DATA_PATH = "C:\\Users\\Michael\\OneDrive\\Documents\\UoA\\COMPSCI_235\\Assignment_3\\CS235Flix_web_app_sqldb\\test\\data"
+TEST_DATA_PATH = os.path.join("C:", os.sep, "Users", "Michael", "OneDrive", "Documents", "UoA", "COMPSCI_235", "Assignment_3", "CS235Flix_web_app_sqldb", "test", "data")
 TEST_DATABASE_URI_IN_MEMORY = 'sqlite://'
 
 @pytest.fixture
@@ -21,7 +21,7 @@ def a_memory_repo():
 
 @pytest.fixture
 def a_file_reader():
-    reader = MovieFileCSVReader(path_join(TEST_DATA_PATH, 'Data1000Movies.csv'))
+    reader = MovieFileCSVReader(os.path.join(TEST_DATA_PATH, 'Data1000Movies.csv'))
     reader.read_csv_file()
     return reader
 

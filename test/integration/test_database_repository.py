@@ -58,7 +58,6 @@ def test_repository_wont_add_genre_that_exists(session_factory):
             count += 1
     assert count == 1
 
-
 def test_repository_get_number_per_genre(session_factory, a_file_reader):
     data_from_test = dict()
     repo = SqlAlchemyRepository(session_factory)
