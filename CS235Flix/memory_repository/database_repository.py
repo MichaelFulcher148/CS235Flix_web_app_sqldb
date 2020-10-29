@@ -2,6 +2,7 @@ from os.path import join as path_join
 from sqlalchemy.orm import scoped_session
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy import desc
 from flask import _app_ctx_stack
 import csv
@@ -50,24 +51,40 @@ class SqlAlchemyRepository(AbstractRepository):
         return self.__release_years
 
     def add_movie(self, a_movie: 'Movie') -> None:
-        pass
-        # self.__movies.append(a_movie)
-        # for genre in a_movie.genres:
-        #     if genre not in self.__genre_pop:
-        #         self.__genre_pop[genre] = 1
-        #     else:
-        #         self.__genre_pop[genre] += 1
+        results = self.__session_cm.session.query(Movie).filter_by(_title=a_movie.title).filter_by(_release_year=a_movie.release_year).all()
+        if not results:
+            with self.__session_cm as scm:
+                result = scm.session.execute(f"SELECT id FROM directors WHERE full_name = '{a_movie.director.director_full_name}'").fetchone()
+                if not result:
+                    scm.session.execute(f"INSERT INTO directors (full_name) VALUES ('{a_movie.director.director_full_name}')")
+                    scm.commit()
+                result = scm.session.execute(f"SELECT id FROM directors WHERE full_name = '{a_movie.director.director_full_name}'").fetchone()
+                scm.session.execute(f"INSERT INTO movies (title, release_year, description, director_id, runtime_minutes) VALUES ('{a_movie.title}', {a_movie.release_year}, '{a_movie.description}', {result[0]}, {a_movie.runtime_minutes})")
+                scm.commit()
+                movie_index = scm.session.execute(f"SELECT id FROM movies WHERE title = '{a_movie.title}' AND release_year = {a_movie.release_year}").fetchone()
+                for item in a_movie.genres:
+                    result = scm.session.execute(f"SELECT id FROM genres WHERE name = '{item.genre_name}'").fetchone()
+                    if not result:
+                        scm.session.execute(f"INSERT INTO genres (name) VALUES ('{item.genre_name}')")
+                        scm.commit()
+                        result = scm.session.execute(f"SELECT id FROM genres WHERE name = '{item.genre_name}'").fetchone()
+                    scm.session.execute(f"INSERT INTO movies_genres (movie_id, genre_id) VALUES ({movie_index[0]}, {result[0]})")
+                    scm.commit()
+                for item in a_movie.actors:
+                    result = scm.session.execute(f"SELECT id FROM actors WHERE full_name = '{item.actor_full_name}'").fetchone()
+                    if not result:
+                        scm.session.execute(f"INSERT INTO actors (full_name) VALUES ('{item.actor_full_name}')")
+                        scm.commit()
+                        result = scm.session.execute(f"SELECT id FROM actors WHERE full_name = '{item.actor_full_name}'").fetchone()
+                    scm.session.execute(f"INSERT INTO movies_actors (movie_id, actor_id) VALUES ({movie_index[0]}, {result[0]})")
+                    scm.commit()
+        else:
+            raise IntegrityError("SQL INSERT INTO movies", f"{a_movie}", "")
 
     def get_size_of_genre(self, a_genre: 'Genre') -> int:
-        return self.__session_cm.session.query(Movie).filter_by(_name=a_genre.genre_name).count()
+        return self.__session_cm.session.execute(f"SELECT COUNT(*) FROM movies_genres WHERE genre_id = (SELECT id FROM genres WHERE name = '{a_genre.genre_name}')").fetchall()[0][0]
 
     def add_genre(self, a_genre: 'Genre'):
-        # self.__genres.append(a_genre)
-        # if a_genre not in self.__genre_pop:
-        #     self.__genre_pop[a_genre] = 0
-        hh = self.__session_cm.session.query(Genre).filter(_genre_name=a_genre.genre_name).all()
-        print(f"{hh} - no found")
-        #  i want to first check with a filter if a_genre exists in db the nest the add/commit into corrisponding if statement.
         with self.__session_cm as scm:
             scm.session.add(a_genre)
             scm.commit()
@@ -83,21 +100,24 @@ class SqlAlchemyRepository(AbstractRepository):
             scm.commit()
 
     def add_release_year(self, a_year: int):
-        self.__release_years.append(a_year)
+        pass
+        # self.__release_years.append(a_year)
 
     def add_user(self, a_user: 'User') -> None:
-        with self.__session_cm as scm:
-            scm.session.add(a_user)
-            scm.commit()
+        results = self.__session_cm.query(User).filter_by(_username=a_user.username).all()
+        if not results:
+            with self.__session_cm as scm:
+                scm.session.add(a_user)
+                scm.commit()
 
     def get_users(self) -> list:
         return self.__session_cm.session.query(User).all()
 
     def find_user(self, username: str) -> 'User' or None:
-        for user in self.__session_cm.session.query(User).all():
-            if user.username == username:
-                return user
-        return None
+        try:
+            return self.__session_cm.session.query(User).filter_by(_username=username).one()
+        except NoResultFound:
+            return None
 
     def add_review(self, a_review: 'Review') -> None:
         self.__reviews.append(a_review)
@@ -146,6 +166,7 @@ def populate(db_engine: Engine, data_path: str):
             result = cursor.execute(f"SELECT id FROM directors WHERE full_name = '{temp_str}'").fetchone()
             if not result:
                 cursor.execute(f"INSERT INTO directors (full_name) VALUES ('{temp_str}')")
+                conn.commit()
                 result = cursor.execute(f"SELECT id FROM directors WHERE full_name = '{temp_str}'").fetchone()
             # print(result)
             if row['Runtime (Minutes)'].isdigit():
@@ -159,32 +180,36 @@ def populate(db_engine: Engine, data_path: str):
             movie_title = row['Title'].replace("'", "''")
             movie_description = row['Description'].replace("'", "''")
             cursor.execute(f"INSERT INTO movies (title, release_year, description, director_id, runtime_minutes) VALUES ('{movie_title}', {release_year}, '{movie_description}', {result[0]}, {movie_runtime})")
+            conn.commit()
             movie_index = cursor.execute(f"SELECT id FROM movies WHERE title = '{movie_title}' AND release_year = {release_year}").fetchone()
             genres = [i.strip() for i in row['Genre'].split(',')]
             for item in genres:
                 result = cursor.execute(f"SELECT id FROM genres WHERE name = '{item}'").fetchone()
                 if not result:
                     cursor.execute(f"INSERT INTO genres (name) VALUES ('{item}')")
+                    conn.commit()
                     result = cursor.execute(f"SELECT id FROM genres WHERE name = '{item}'").fetchone()
                 cursor.execute(f"INSERT INTO movies_genres (movie_id, genre_id) VALUES ({movie_index[0]}, {result[0]})")
+                conn.commit()
             actors = [i.strip().replace("'", "''") for i in row['Actors'].split(',')]
             for item in actors:
                 result = cursor.execute(f"SELECT id FROM actors WHERE full_name = '{item}'").fetchone()
                 if not result:
                     cursor.execute(f"INSERT INTO actors (full_name) VALUES ('{item}')")
+                    conn.commit()
                     result = cursor.execute(f"SELECT id FROM actors WHERE full_name = '{item}'").fetchone()
                 cursor.execute(f"INSERT INTO movies_actors (movie_id, actor_id) VALUES ({movie_index[0]}, {result[0]})")
-            conn.commit()
+                conn.commit()
     with open(path_join(data_path, 'user_data.csv'), encoding='utf-8-sig') as file_data:
         reader = csv.DictReader(file_data)
         for row in reader:
-            username = row['username'].strip()
-            pass_hash = row['password_hash'].strip()
+            username = row['username'].strip().replace("'", "''")
+            pass_hash = row['password_hash'].strip().replace("'", "''")
             if row['time_spent_watching_movies'].isdigit():
                 time_spent = int(row['time_spent_watching_movies'].strip())
             else:
                 time_spent = 0
             cursor.execute(f"INSERT INTO users (username, password, time_spent_watching_movies) VALUES ('{username}', '{pass_hash}', {time_spent})")
-        conn.commit()
+            conn.commit()
     conn.close()
             # cursor.execute(f"INSERT INTO movies (title, release_year, description, director_id, runtime_minutes) VALUES ()")

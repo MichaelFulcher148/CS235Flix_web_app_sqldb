@@ -6,30 +6,36 @@ def insert_users(db_session, user_list):
     for item in user_list:
         db_session.execute(f'INSERT INTO users (username, password) VALUES (:username, :password)',
                            {'username': item[0], 'password': item[1]})
+        db_session.commit()
 
 def insert_directors(db_session, director_list):
     for item in director_list:
         db_session.execute(f"INSERT INTO directors (full_name) VALUES ('{item}')")
+        db_session.commit()
 
 def insert_genres(db_session, genre_list):
     for item in genre_list:
         db_session.execute(f"INSERT INTO genres (name) VALUES ('{item}')")
+        db_session.commit()
 
 def insert_actors(db_session, actor_list):
     for item in actor_list:
         db_session.execute(f"INSERT INTO actors (full_name) VALUES ('{item}')")
+        db_session.commit()
         
 def insert_movie(db_session, title, director, genres_list, actors_list, description, release_year, movie_runtime):
     temp_str = director.strip().replace("'", "''")
     result = db_session.execute(f"SELECT id FROM directors WHERE full_name = '{temp_str}'").fetchone()
     if not result:
         db_session.execute(f"INSERT INTO directors (full_name) VALUES ('{temp_str}')")
+        db_session.commit()
         result = db_session.execute(f"SELECT id FROM directors WHERE full_name = '{temp_str}'").fetchone()
     # print(result)
     movie_title = title.replace("'", "''")
     movie_description = description.replace("'", "''")
     db_session.execute(
         f"INSERT INTO movies (title, release_year, description, director_id, runtime_minutes) VALUES ('{movie_title}', {release_year}, '{movie_description}', {result[0]}, {movie_runtime})")
+    db_session.commit()
     movie_index = db_session.execute(
         f"SELECT id FROM movies WHERE title = '{movie_title}' AND release_year = {release_year}").fetchone()
     genres = [i.strip() for i in genres_list]
@@ -37,21 +43,26 @@ def insert_movie(db_session, title, director, genres_list, actors_list, descript
         result = db_session.execute(f"SELECT id FROM genres WHERE name = '{item}'").fetchone()
         if not result:
             db_session.execute(f"INSERT INTO genres (name) VALUES ('{item}')")
+            db_session.commit()
             result = db_session.execute(f"SELECT id FROM genres WHERE name = '{item}'").fetchone()
         db_session.execute(f"INSERT INTO movies_genres (movie_id, genre_id) VALUES ({movie_index[0]}, {result[0]})")
+        db_session.commit()
     actors = [i.strip().replace("'", "''") for i in actors_list]
     for item in actors:
         result = db_session.execute(f"SELECT id FROM actors WHERE full_name = '{item}'").fetchone()
         if not result:
             db_session.execute(f"INSERT INTO actors (full_name) VALUES ('{item}')")
+            db_session.commit()
             result = db_session.execute(f"SELECT id FROM actors WHERE full_name = '{item}'").fetchone()
         db_session.execute(f"INSERT INTO movies_actors (movie_id, actor_id) VALUES ({movie_index[0]}, {result[0]})")
+        db_session.commit()
 
 def insert_review(db_session, movie_title, movie_release_year, user_id, review_text, review_rating):
     result = db_session.execute(f"SELECT id FROM movies WHERE title = '{movie_title}' AND release_year = {movie_release_year}").fetchone()
     if result:
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         db_session.execute(f"INSERT INTO reviews (movie_id, review_text, rating, timestamp, user_id) VALUES ({result[0]}, '{review_text}', {review_rating}, '{timestamp}', {user_id})")
+        db_session.commit()
     else:
         print("insert review - Movie not found")
 
