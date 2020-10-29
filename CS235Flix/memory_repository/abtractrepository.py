@@ -21,6 +21,10 @@ class AbstractRepository(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
+    def add_movies(self) -> None:
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def add_movie(self) -> None:
         raise NotImplementedError
 

@@ -50,6 +50,10 @@ class SqlAlchemyRepository(AbstractRepository):
     def get_release_years(self) -> list:
         return self.__release_years
 
+    def add_movies(self, movie_list: list) -> None:
+        for item in movie_list:
+            self.add_movie(item)
+
     def add_movie(self, a_movie: 'Movie') -> None:
         results = self.__session_cm.session.query(Movie).filter_by(_title=a_movie.title).filter_by(_release_year=a_movie.release_year).all()
         if not results:
@@ -84,17 +88,17 @@ class SqlAlchemyRepository(AbstractRepository):
     def get_size_of_genre(self, a_genre: 'Genre') -> int:
         return self.__session_cm.session.execute(f"SELECT COUNT(*) FROM movies_genres WHERE genre_id = (SELECT id FROM genres WHERE name = '{a_genre.genre_name}')").fetchall()[0][0]
 
-    def add_genre(self, a_genre: 'Genre'):
+    def add_genre(self, a_genre: 'Genre') -> None:
         with self.__session_cm as scm:
             scm.session.add(a_genre)
             scm.commit()
 
-    def add_actor(self, a_actor: 'Actor'):
+    def add_actor(self, a_actor: 'Actor') -> None:
         with self.__session_cm as scm:
             scm.session.add(a_actor)
             scm.commit()
 
-    def add_director(self, a_director: 'Director'):
+    def add_director(self, a_director: 'Director') -> None:
         with self.__session_cm as scm:
             scm.session.add(a_director)
             scm.commit()

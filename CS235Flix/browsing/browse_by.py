@@ -37,16 +37,17 @@ def browse_by_genre():
     if genre_pick is None:
         return render_template('browse_by_genre.html', genre_list=genre_list)
     else:
-        h = services.get_pop_of_genre(genre_pick, repo.repository_instance)
-        print(h)
-        if h > 20:
-            first_letters, movie_list, first_letter = services.setup_browse_by_genre(first_letter, genre_pick, repo.repository_instance)
-            left_link, right_link = setup_arrows('browse_bp.browse_by_genre', first_letter, first_letters, "genre=" + genre_pick)
-            return render_template('browse_by_genre.html', genre=genre_pick, genre_list=genre_list, left_arrow=left_link,
-                                   right_arrow=right_link, initials=first_letters, movie_list=CS235Flix.common.make_dict_from_movie_list(movie_list))
-        return render_template('browse_by_genre.html', genre=genre_pick, genre_list=genre_list,
-                               movie_list=CS235Flix.common.make_dict_from_movie_list(
+        if genre_pick in genre_list:
+            if services.get_pop_of_genre(genre_pick, repo.repository_instance) > 20:
+                first_letters, movie_list, first_letter = services.setup_browse_by_genre(first_letter, genre_pick, repo.repository_instance)
+                left_link, right_link = setup_arrows('browse_bp.browse_by_genre', first_letter, first_letters, "genre=" + genre_pick)
+                return render_template('browse_by_genre.html', genre=genre_pick, genre_list=genre_list, left_arrow=left_link,
+                                       right_arrow=right_link, initials=first_letters, movie_list=CS235Flix.common.make_dict_from_movie_list(movie_list))
+            return render_template('browse_by_genre.html', genre=genre_pick, genre_list=genre_list,
+                                   movie_list=CS235Flix.common.make_dict_from_movie_list(
                                    CS235Flix.common.get_movies_by_genre(genre_pick, repo.repository_instance)))
+        else:
+            return render_template('browse_by_genre.html', genre_list=genre_list)
 
 @browse_blueprint.route('/browse_by_director')
 def browse_by_director():

@@ -28,6 +28,10 @@ class MemoryRepository(AbstractRepository):
     def get_release_years(self) -> list:
         return self.__release_years
 
+    def add_movies(self, movie_list: list) -> None:
+        for item in movie_list:
+            self.add_movie(item)
+
     def add_movie(self, a_movie: 'Movie') -> None:
         self.__movies.append(a_movie)
         for genre in a_movie.genres:
