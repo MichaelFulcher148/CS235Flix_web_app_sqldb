@@ -87,5 +87,5 @@ def map_model_to_tables():
         '_genres_list': relationship(Genre, secondary=genres_to_movies, backref='_genres')
     })
     # mapper(WatchList, watchlists, properties={
-    #     '_the_list': relationship(Movie, watchlists, backref='_movies')
+    #     '_the_list': relationship(Movie, back_populates='movies.id')
     # })

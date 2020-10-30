@@ -108,11 +108,9 @@ class SqlAlchemyRepository(AbstractRepository):
         # self.__release_years.append(a_year)
 
     def add_user(self, a_user: 'User') -> None:
-        results = self.__session_cm.session.query(User).filter_by(_username=a_user.username).all()
-        if not results:
-            with self.__session_cm as scm:
-                scm.session.add(a_user)
-                scm.commit()
+        with self.__session_cm as scm:
+            scm.session.add(a_user)
+            scm.commit()
 
     def get_users(self) -> list:
         return self.__session_cm.session.query(User).all()

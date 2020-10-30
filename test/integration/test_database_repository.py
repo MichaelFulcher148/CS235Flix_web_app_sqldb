@@ -213,3 +213,26 @@ def test_database_repository_can_add_review(session_factory):
                 break
     assert review_found.review_text == 'was alright'
     assert review_found.rating == 7
+
+def test_database_repository_can_add_user(session_factory):
+    repo = SqlAlchemyRepository(session_factory)
+    count = 0
+    the_ropos_user_list = repo.get_users()
+    for gen in the_ropos_user_list:
+        if gen == User('philio', 'whereisthepathtohimilton'):
+            count += 1
+    assert count == 0
+    repo.add_user(User('philio', 'whereisthepathtohimilton'))
+    the_ropos_user_list = repo.get_users()
+    assert User('philio', 'whereisthepathtohimilton') in the_ropos_user_list
+
+def test_database_repository_wont_add_user_that_exists(session_factory):
+    repo = SqlAlchemyRepository(session_factory)
+    count = 0
+    the_ropos_user_list = repo.get_users()
+    for gen in the_ropos_user_list:
+        if gen == User('man_of_pokemon', 'dontknowpassword'):
+            count += 1
+    assert count == 1
+    with pytest.raises(IntegrityError):
+        repo.add_user(User('man_of_pokemon', 'dontknowpassword'))
