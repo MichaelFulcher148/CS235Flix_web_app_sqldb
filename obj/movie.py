@@ -283,3 +283,7 @@ class Review:
     @property
     def user(self):
         return self._user
+
+    @user.setter
+    def user(self, a_user: 'User'):
+        self._user = a_user

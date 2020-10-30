@@ -1,6 +1,7 @@
 import pytest
 from datetime import datetime
 from obj.movie import Movie, Genre, Actor, Director, Review
+from obj.user import User
 from CS235Flix.memory_repository.database_repository import SqlAlchemyRepository
 from sqlalchemy.exc import IntegrityError
 
@@ -193,3 +194,19 @@ def test_database_repository_wont_add_movie_that_exists(session_factory):
     assert len(b_movie.actors) == len(actors_list)
     for actor in actors_list:
         assert actor in b_movie.actors
+
+def test_database_repository_can_add_review(session_factory):
+    repo = SqlAlchemyRepository(session_factory)
+    a_movie = Movie('The Lost City of Z', 2016)
+    a_review = Review(a_movie, 'was alright', 7)
+    a_review.user = User('mistamime', 'pbkdf2:sha256:150000$i0E7SvrW$3fcec13019d221b565cb40ddd09ec38db8dc73aa5cbda722cc9a1508bc4075cb')
+    repo.add_review(a_review)
+    users_from_repo = repo.get_users()
+    review_found = None
+    for user in users_from_repo:
+        for review in user.reviews:
+            if review.movie == a_movie:
+                review_found = review
+                break
+    assert review_found.review_text == 'was alright'
+    assert review_found.rating == 7

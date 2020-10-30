@@ -108,7 +108,7 @@ class SqlAlchemyRepository(AbstractRepository):
         # self.__release_years.append(a_year)
 
     def add_user(self, a_user: 'User') -> None:
-        results = self.__session_cm.query(User).filter_by(_username=a_user.username).all()
+        results = self.__session_cm.session.query(User).filter_by(_username=a_user.username).all()
         if not results:
             with self.__session_cm as scm:
                 scm.session.add(a_user)
@@ -124,8 +124,20 @@ class SqlAlchemyRepository(AbstractRepository):
             return None
 
     def add_review(self, a_review: 'Review') -> None:
-        self.__reviews.append(a_review)
-        print(self.__reviews)
+        # with self.__session_cm as scm:
+        #     scm.session.add(a_review)
+        #     scm.commit()
+        movie_id = self.__session_cm.session.execute(
+            f"SELECT id FROM movies WHERE title = '{a_review.movie.title}' AND release_year = {a_review.movie.release_year}").fetchone()
+        user_id = self.__session_cm.session.execute(f"SELECT id FROM users WHERE username = '{a_review.user.username}'").fetchone()
+        if movie_id and user_id:
+            timestamp = a_review.timestamp.strftime('%Y-%m-%d %H:%M:%S')
+            with self.__session_cm as scm:
+                scm.session.execute(
+                    f"INSERT INTO reviews (movie_id, review_text, rating, timestamp, user_id) VALUES ({movie_id[0]}, '{a_review.review_text}', {a_review.rating}, '{timestamp}', {user_id[0]})")
+                scm.commit()
+        else:
+            print(f"add_review error: movie_id {movie_id}, user_id {user_id}")
 
 class SessionContextManager:
     def __init__(self, session_factory):
