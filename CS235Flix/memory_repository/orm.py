@@ -2,6 +2,7 @@ from sqlalchemy import (Table, MetaData, Column, Integer, String, Date, DateTime
 from sqlalchemy.orm import mapper, relationship
 from obj.movie import Review, Movie, Genre, Actor, Director
 from obj.user import User
+from obj.watchlist import WatchList
 
 metadata = MetaData()
 
@@ -58,7 +59,7 @@ def map_model_to_tables():
         '_username': users.c.username,
         '_password': users.c.password,
         '_time_spent_watching_movies_minutes': users.c.time_spent_watching_movies,
-        '_reviews': relationship(Review, backref='_reviews')  # ('Review')?
+        '_reviews': relationship(Review, backref='_reviews')
     })
     mapper(Genre, genres, properties={
         '_genre_name': genres.c.name
@@ -85,3 +86,6 @@ def map_model_to_tables():
         '_actors_list': relationship(Actor, secondary=actors_to_movies, backref='_actors'),
         '_genres_list': relationship(Genre, secondary=genres_to_movies, backref='_genres')
     })
+    # mapper(WatchList, watchlists, properties={
+    #     '_the_list': relationship(Movie, watchlists, backref='_movies')
+    # })

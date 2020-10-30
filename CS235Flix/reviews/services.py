@@ -12,14 +12,13 @@ def add_review(user_name: str, movie_title: str, movie_release_date: int, review
                 break
         new_review = Review(a_movie, review_text, rating_num)
         new_review.user = a_user
+        a_user.add_review(new_review)
         repo.add_review(new_review)
 
 def get_reviews(title: str, date: int, repo: 'AbstractRepository'):
     reviews_data = list()
     for user in repo.get_users():
-        print(user)
         for review in user.reviews:
-            print(review)
             if review.movie.title == title and review.movie.release_year == date:
                 a_review = dict()
                 a_review['text'] = review.review_text

@@ -78,7 +78,6 @@ class MemoryRepository(AbstractRepository):
 
     def add_review(self, a_review: 'Review') -> None:
         self.__reviews.append(a_review)
-        print(self.__reviews)
 
 def populate(data_loc: str, repo: 'MemoryRepository') -> None:
     file_reader = MovieFileCSVReader(path_join(data_loc, 'Data1000Movies.csv'))
