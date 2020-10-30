@@ -12,7 +12,7 @@ def test_database_repository_can_get_genres(session_factory):
                     'History', 'Horror', 'Music', 'Musical', 'Mystery', 'Romance', 'Sci-Fi', 'Sport', 'Thriller', 'War',
                     'Western']
     expected = [Genre(name) for name in expected_str]
-    assert len(expected) == len(the_ropos_genre_list)
+    assert len(the_ropos_genre_list) == 20
     for genre in the_ropos_genre_list:
         assert genre in expected
 
@@ -24,6 +24,7 @@ def test_database_repository_can_get_actors(session_factory):
                 'Robert Carlyle', 'Robert De Niro', 'Robert Downey Jr.', 'Robert Duvall', 'Robert Hoffman',
                 'Robert Knepper', 'Robert Patrick', 'Robert Pattinson', 'Robert Redford', 'O\'Shea Jackson Jr.', "Temuera Morrison"]
     expected_actors = [Actor(name) for name in expected_str_list]
+    assert len(a_actor_list) == 1985
     for actor in expected_actors:
         assert actor in a_actor_list
 
@@ -33,6 +34,7 @@ def test_database_repository_can_get_movies(session_factory):
     a_movie = Movie("Moana", 2016)
     spiderman_movie = Movie("The Amazing Spider-Man", 2012)
     arrival_movie = Movie('Arrival', 2016,)
+    assert len(a_movie_list) == 1000
     assert a_movie in a_movie_list
     assert spiderman_movie in a_movie_list
     assert arrival_movie in a_movie_list
@@ -41,6 +43,7 @@ def test_database_repository_can_get_directors(session_factory):
     repo = SqlAlchemyRepository(session_factory)
     a_director_list = repo.get_directors()
     expected_director = [Director("Ridley Scott"), Director('Denis Villeneuve')]
+    assert len(a_director_list) == 644
     for director in expected_director:
         assert director in a_director_list
 

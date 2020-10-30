@@ -138,17 +138,8 @@ def test_load_review(empty_session):
     insert_users(empty_session, users)
     review_text = 'was definitely a 5'
     rating = 5
-    a_review = Review(a_movie, review_text, rating)
     result = empty_session.execute(f"SELECT id from users WHERE username = 'jim'").fetchone()
     insert_review(empty_session, movie_title, release_year, result[0], review_text, rating)
-    # result = empty_session.execute(f"SELECT id from movies WHERE title = 'Passengers'").fetchone()
-    movie_id = empty_session.execute(f"SELECT id from movies WHERE title = '{movie_title}' AND release_year = {release_year}").fetchone()
-    print(movie_id)
-    # b_review = empty_session.query(Review).filter(Review._user.has(users_expected[0])).one()
-    # b_review = empty_session.query(Review).filter('_user' == result[0]).all()
-    # b_review = empty_session.query(Review).all()
-    # print(b_review)
-    # b_review = empty_session.query(Review).filter(User == users[0]).all()
     users = empty_session.query(User).all()
     found_review = None
     for user in users:
@@ -157,8 +148,5 @@ def test_load_review(empty_session):
                 if review.movie == Movie(movie_title, release_year):
                     found_review = review
                     break
-    # print(b_review)
-    # assert b_review[0] == a_review
-    print(found_review)
     assert found_review.review_text == 'was definitely a 5'
     assert found_review.rating == 5
